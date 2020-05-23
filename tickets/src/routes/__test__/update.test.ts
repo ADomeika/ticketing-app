@@ -2,6 +2,7 @@ import request from 'supertest'
 import mongoose from 'mongoose'
 import { app } from '../../app'
 import { natsWrapper } from '../../nats-wrapper'
+import { Ticket } from '../../models/ticket'
 
 it('should return 404 if provided id does not exist', async () => {
   const id = new mongoose.Types.ObjectId().toHexString()
@@ -51,6 +52,34 @@ it('should return 401 if user does not own a ticket', async () => {
   
   expect(originalTicketResponse.body.title).toBe('Concert')
   expect(originalTicketResponse.body.price).toBe(15)
+})
+
+it('should return 400 if ticket is reserved', async () => {
+  const cookie = global.signin()
+
+  const response = await request(app)
+    .post('/api/tickets')
+    .set('Cookie', cookie)
+    .send({
+      title: 'Concert',
+      price: 15
+    })
+    .expect(201)
+
+  const ticket = await Ticket.findById(response.body.id)
+
+  ticket!.set({ orderId: mongoose.Types.ObjectId().toHexString() })
+
+  await ticket!.save()
+
+  await request(app)
+    .put(`/api/tickets/${response.body.id}`)
+    .set('Cookie', cookie)
+    .send({
+      title: 'New Title',
+      price: 25
+    })
+    .expect(400)
 })
 
 it('should return 400 if user provides invalid title or price', async () => {

@@ -4,7 +4,8 @@ import {
   requireAuth,
   validateRequest,
   NotFoundError,
-  NotAuthorizedError
+  NotAuthorizedError,
+  BadRequestError
 } from '@adtickets/common'
 
 import { Ticket } from '../models/ticket'
@@ -31,6 +32,10 @@ router.put('/api/tickets/:id', requireAuth, [
     throw new NotAuthorizedError()
   }
 
+  if (ticket.orderId) {
+    throw new BadRequestError('Cannot edit reserved ticket')
+  }
+
   ticket.set({
     title: req.body.title,
     price: req.body.price
@@ -42,7 +47,8 @@ router.put('/api/tickets/:id', requireAuth, [
     id: ticket.id,
     title: ticket.title,
     price: ticket.price,
-    userId: ticket.userId
+    userId: ticket.userId,
+    version: ticket.version
   })
 
   res.send(ticket)

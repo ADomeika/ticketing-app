@@ -7,7 +7,7 @@ import { NotFoundError, errorHandler, currentUser } from '@adtickets/common'
 import { insertRouter } from './routes/insert'
 import { showRouter } from './routes/show'
 import { indexRouter } from './routes/index'
-import { updateRouter } from './routes/update'
+import { destroyRouter } from './routes/update'
 
 const app = express()
 app.set('trust proxy', true)
@@ -23,7 +23,7 @@ app.use(currentUser)
 app.use(insertRouter)
 app.use(showRouter)
 app.use(indexRouter)
-app.use(updateRouter)
+app.use(destroyRouter)
 
 app.all('*', async (req, res) => {
   throw new NotFoundError()
