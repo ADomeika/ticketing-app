@@ -53,6 +53,7 @@ const start = async () => {
   }
 
   app.listen(3000, () => {
+    console.log('Starting Tickets service...')
     console.log('Listening on port 3000!')
   })
 }
